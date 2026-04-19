@@ -43,6 +43,81 @@
       margin: 0 auto;
       line-height: 1.5;
     }
+
+    .card {
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      padding: 28px;
+      margin-bottom: 24px;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+
+    .input-group {
+      flex: 1 1 340px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #34495e;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 10px 14px;
+      border: 2px solid #d5dbdb;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+
+    input[type="number"]:focus {
+      border-color: #3498db;
+    }
+
+    input[type="number"].error {
+      border-color: #e74c3c;
+    }
+
+    .error-msg {
+      font-size: 0.825rem;
+      color: #e74c3c;
+      min-height: 18px;
+    }
+
+    button {
+      align-self: flex-start;
+      margin-top: 24px;
+      padding: 11px 28px;
+      background: #3498db;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      white-space: nowrap;
+    }
+
+    button:hover {
+      background: #2980b9;
+    }
+
+    button:active {
+      transform: scale(0.97);
+    }
   </style>
 </head>
 <body>
@@ -54,6 +129,24 @@
         to build sequentially that maximizes total earnings from operational time.
       </p>
     </header>
+
+    <div class="card">
+      <div class="input-row">
+        <div class="input-group">
+          <label for="timeInput">Time units available (n)</label>
+          <input
+            type="number"
+            id="timeInput"
+            min="0"
+            step="1"
+            placeholder="e.g. 13"
+            autocomplete="off"
+          />
+          <span class="error-msg" id="errorMsg"></span>
+        </div>
+        <button id="calcBtn">Calculate</button>
+      </div>
+    </div>
   </div>
 </body>
 </html>

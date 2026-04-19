@@ -1,13 +1,17 @@
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=12,20,24&height=220&section=header&text=Max%20Profit&fontSize=80&fontAlignY=38&animation=twinkling&fontColor=ffffff&desc=Schedule%20builds,%20bank%20earnings,%20maximize%20the%20timeline&descAlignY=60&descSize=17" alt="Max Profit header" width="100%">
+<a href="https://quint-max-profit.vercel.app">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=12,20,24&height=220&section=header&text=Max%20Profit&fontSize=80&fontAlignY=38&animation=twinkling&fontColor=ffffff&desc=Schedule%20builds,%20bank%20earnings,%20maximize%20the%20timeline&descAlignY=60&descSize=17" alt="Max Profit header" width="100%">
+</a>
+
+### [→ Live demo](https://quint-max-profit.vercel.app)
 
 <p>
   <img alt="HTML5"      src="https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white&style=for-the-badge">
   <img alt="CSS3"       src="https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white&style=for-the-badge">
   <img alt="JavaScript" src="https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=000&style=for-the-badge">
   <img alt="SVG"        src="https://img.shields.io/badge/SVG-FFB13B?logo=svg&logoColor=white&style=for-the-badge">
-  <img alt="Algorithms" src="https://img.shields.io/badge/Algorithm-Greedy%20%2B%20Enumeration-2980B9?style=for-the-badge">
+  <a href="https://quint-max-profit.vercel.app"><img alt="Vercel" src="https://img.shields.io/badge/Live-Vercel-000000?logo=vercel&logoColor=white&style=for-the-badge"></a>
 </p>
 
 <p><i>Zero dependencies. Single file. Open <code>index.html</code> and go.</i></p>

@@ -148,5 +148,30 @@
       </div>
     </div>
   </div>
+
+  <script>
+    // -------------------------------------------------------------------------
+    // Building catalogue
+    //
+    // Each building has:
+    //   - buildTime: units of time required to construct it
+    //   - rate: earnings per unit of time once operational
+    //
+    // Priority (rate / buildTime) determines optimal build order when a given
+    // count of each type is chosen:
+    //   Theatre = 1500/5 = 300 (highest)
+    //   Pub     = 1000/4 = 250
+    //   Park    = 2000/10 = 200 (lowest)
+    // -------------------------------------------------------------------------
+    var BUILDINGS = {
+      T: { key: 'T', label: 'Theatre',         buildTime: 5,  rate: 1500 },
+      P: { key: 'P', label: 'Pub',             buildTime: 4,  rate: 1000 },
+      C: { key: 'C', label: 'Commercial Park', buildTime: 10, rate: 2000 }
+    };
+
+    // Build order matters: putting higher rate/buildTime first maximizes profit.
+    // The swap argument shows adjacent swaps only improve if sorted this way.
+    var BUILD_ORDER = ['T', 'P', 'C'];
+  </script>
 </body>
 </html>

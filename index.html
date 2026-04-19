@@ -172,6 +172,66 @@
     // Build order matters: putting higher rate/buildTime first maximizes profit.
     // The swap argument shows adjacent swaps only improve if sorted this way.
     var BUILD_ORDER = ['T', 'P', 'C'];
+
+    // -------------------------------------------------------------------------
+    // Earnings computation for a fixed (t, p, c) mix built in priority order
+    //
+    // Building i is operational from time (cumulative build times up to i) to n,
+    // so its earnings = rate_i * (n - end_time_i).
+    // -------------------------------------------------------------------------
+    function earningsFor(counts, n) {
+      var current = 0;
+      var total = 0;
+
+      for (var b = 0; b < BUILD_ORDER.length; b++) {
+        var key = BUILD_ORDER[b];
+        var spec = BUILDINGS[key];
+        var count = counts[key];
+
+        for (var i = 0; i < count; i++) {
+          current += spec.buildTime;
+          if (current > n) return -1; // ran out of time mid-build
+          total += spec.rate * (n - current);
+        }
+      }
+      return total;
+    }
+
+    // -------------------------------------------------------------------------
+    // Search every valid (t, p, c) combination, collecting all ties at max
+    //
+    // Bounded enumeration: at most floor(n/4) + 1 pubs per axis, and similar
+    // bounds on theatres and parks, so the search space stays tiny.
+    // -------------------------------------------------------------------------
+    function solve(n) {
+      var maxT = Math.floor(n / BUILDINGS.T.buildTime);
+      var maxP = Math.floor(n / BUILDINGS.P.buildTime);
+      var maxC = Math.floor(n / BUILDINGS.C.buildTime);
+
+      var best = 0;
+      var solutions = [];
+
+      for (var t = 0; t <= maxT; t++) {
+        for (var p = 0; p <= maxP; p++) {
+          for (var c = 0; c <= maxC; c++) {
+            if (t === 0 && p === 0 && c === 0) continue;
+            if (5 * t + 4 * p + 10 * c > n) continue;
+
+            var profit = earningsFor({ T: t, P: p, C: c }, n);
+            if (profit < 0) continue;
+
+            if (profit > best) {
+              best = profit;
+              solutions = [{ T: t, P: p, C: c }];
+            } else if (profit === best && best > 0) {
+              solutions.push({ T: t, P: p, C: c });
+            }
+          }
+        }
+      }
+
+      return { earnings: best, solutions: solutions };
+    }
   </script>
 </body>
 </html>

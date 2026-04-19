@@ -1,16 +1,24 @@
-# Max Profit Problem
+<div align="center">
 
-Given `n` time units, pick the mix of Theatres, Pubs, and Commercial Parks to build sequentially that maximizes total earnings from operational time. Built with vanilla JavaScript, HTML/CSS, and inline SVG.
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=12,20,24&height=220&section=header&text=Max%20Profit&fontSize=80&fontAlignY=38&animation=twinkling&fontColor=ffffff&desc=Schedule%20builds,%20bank%20earnings,%20maximize%20the%20timeline&descAlignY=60&descSize=17" alt="Max Profit header" width="100%">
 
-## Demo
+<p>
+  <img alt="HTML5"      src="https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white&style=for-the-badge">
+  <img alt="CSS3"       src="https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white&style=for-the-badge">
+  <img alt="JavaScript" src="https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=000&style=for-the-badge">
+  <img alt="SVG"        src="https://img.shields.io/badge/SVG-FFB13B?logo=svg&logoColor=white&style=for-the-badge">
+  <img alt="Algorithms" src="https://img.shields.io/badge/Algorithm-Greedy%20%2B%20Enumeration-2980B9?style=for-the-badge">
+</p>
 
-Open `index.html` in any modern browser. The default example `n = 13` loads on start, producing **$16,500** via the optimal mix `T: 2, P: 0, C: 0`.
+<p><i>Zero dependencies. Single file. Open <code>index.html</code> and go.</i></p>
 
-## The Rules
+</div>
 
-- Only one property can be under construction at a time — builds run back-to-back.
-- Once a building finishes, it earns its rate for every remaining time unit up to `n`.
-- Buildings that cannot finish within `n` are dropped from consideration.
+---
+
+## The Problem
+
+Mr. X has infinite land on Mars. In `n` time units, he can build **Theatres**, **Pubs**, or **Commercial Parks** — one at a time, back-to-back. Each finished building earns its rate for every remaining time unit up to `n`. Pick the mix that maximizes total earnings.
 
 | Building | Build time | Rate / unit |
 |----------|-----------:|------------:|
@@ -18,41 +26,51 @@ Open `index.html` in any modern browser. The default example `n = 13` loads on s
 | Pub      | 4  | $1,000 |
 | Commercial Park | 10 | $2,000 |
 
+Output format: `T: <n>, P: <n>, C: <n>` for every mix tied at the maximum.
+
+## Quick Start
+
+```bash
+git clone https://github.com/shivani2001-art/quint-max-profit.git
+cd quint-max-profit
+open index.html
+```
+
+The default example `n = 13` runs on load. Enter any non-negative integer, press **Enter** or click **Calculate**, and the earnings + optimal mixes + Gantt timeline update.
+
 ## Algorithm
 
 ### Two insights
 
-**1. Within a chosen mix, build order is determined by rate / build_time.**
+**1. Within a chosen mix, optimal build order sorts by `rate / buildTime` descending.**
 
-Consider building two properties A then B. A earns `rate_A * (n - buildTime_A)`, B earns `rate_B * (n - buildTime_A - buildTime_B)`. Swapping to B-then-A flips which term carries which penalty. An adjacent swap improves profit iff `rate_A / buildTime_A > rate_B / buildTime_B`.
-
-So the optimal order sorts buildings by `rate / buildTime` descending:
+Consider building A then B. A earns `rate_A · (n − buildTime_A)`, B earns `rate_B · (n − buildTime_A − buildTime_B)`. The adjacent swap argument shows A-then-B beats B-then-A iff `rate_A / buildTime_A > rate_B / buildTime_B`.
 
 | Building | rate / buildTime |
 |----------|-----------------:|
-| Theatre  | 300 |
+| Theatre  | **300** |
 | Pub      | 250 |
 | Commercial Park | 200 |
 
-Theatre first, then Pub, then Park.
+So the schedule is always: all Theatres → all Pubs → all Parks.
 
-**2. The space of mixes is tiny — enumerate it.**
+**2. The mix space is tiny — enumerate it.**
 
-For any `n`, the number of candidate mixes is bounded by `floor(n/5) * floor(n/4) * floor(n/10)`. Even for `n = 500` that's only ~62,500 triples, each evaluated in O(total buildings). We iterate every valid `(t, p, c)` triple with `5t + 4p + 10c ≤ n`, compute profit using the proven-optimal order, and keep all triples tied at the max.
+For any `n`, candidate mixes are bounded by `⌊n/5⌋ · ⌊n/4⌋ · ⌊n/10⌋`. Even at `n = 500`, that's ~62,500 triples — each evaluated in O(total buildings). Iterate every valid `(t, p, c)` with `5t + 4p + 10c ≤ n`, compute profit in the proven-optimal order, and keep all triples tied at the max.
 
 ### Why this over dynamic programming?
 
 | Approach | Time | Space | Trade-off |
 |----------|------|-------|-----------|
 | **Bounded enumeration + greedy order** | O(n³ / 200) | O(1) | Simple, fast at the target scale |
-| 1-D DP over time | O(n · k) | O(n) | Standard knapsack-style but needs care around build order |
-| Full DP over mix | O(n³) | O(n³) | Same state space, strictly more bookkeeping |
+| 1-D DP over time | O(n · k) | O(n) | Standard knapsack-style, careful around ordering |
+| Full DP over mix state | O(n³) | O(n³) | Same space traversed, strictly more bookkeeping |
 
-At the scale this problem operates on (tens to low hundreds of time units), bounded enumeration is the clearest code that's still fast enough. Nothing gained by getting fancier.
+At tens-to-low-hundreds time units, bounded enumeration is the clearest code that is still fast enough. Fancier doesn't help.
 
 ## Test Cases
 
-Reproduces the PDF spec exactly:
+Reproduces the spec exactly:
 
 | n | Max earnings | Optimal mixes |
 |---|-------------:|---------------|
@@ -62,10 +80,26 @@ Reproduces the PDF spec exactly:
 
 ## Features
 
-- Numeric input for `n` with inline validation
-- Max earnings callout plus list of every tied-optimal mix
-- Gantt-style SVG timeline showing build and operational phases per building
-- Enter key submits from the input
+- Numeric input for `n` with inline validation (non-negative integers only)
+- Max earnings callout + list of every tied-optimal mix as color-coded tags
+- Gantt-style SVG timeline showing each building's build phase (solid) and operational phase (striped)
+- **Enter** submits from the input field
 - Auto-runs the default example on load
 - Responsive layout that reflows on mobile
 - No frameworks, no build step, no dependencies
+
+## Project Structure
+
+```
+.
+├── index.html   # the entire app — HTML, CSS, and JS inline
+└── readme.md
+```
+
+## Tech
+
+Vanilla **HTML / CSS / JavaScript** with inline **SVG**. No bundler, no framework, no `package.json`. One file, any static host.
+
+## License
+
+MIT

@@ -290,6 +290,7 @@
             id="timeInput"
             min="0"
             step="1"
+            value="13"
             placeholder="e.g. 13"
             autocomplete="off"
           />
@@ -647,6 +648,70 @@
 
       return svg;
     }
+
+    // -------------------------------------------------------------------------
+    // Main compute-and-render function
+    // -------------------------------------------------------------------------
+    function run() {
+      var inputEl     = document.getElementById('timeInput');
+      var errorEl     = document.getElementById('errorMsg');
+      var earningsEl  = document.getElementById('earnings');
+      var svgWrapper  = document.getElementById('svgWrapper');
+      var emptyViz    = document.getElementById('emptyViz');
+      var legend      = document.getElementById('legend');
+      var vizSub      = document.getElementById('vizSub');
+
+      errorEl.textContent = '';
+      inputEl.classList.remove('error');
+
+      var parsed = parseInput(inputEl.value);
+      if (parsed.error) {
+        errorEl.textContent = parsed.error;
+        inputEl.classList.add('error');
+        earningsEl.classList.remove('visible');
+        var oldSVG = svgWrapper.querySelector('svg');
+        if (oldSVG) svgWrapper.removeChild(oldSVG);
+        if (emptyViz) emptyViz.style.display = '';
+        legend.style.display = 'none';
+        return;
+      }
+
+      var n = parsed.n;
+      var res = solve(n);
+      renderResult(res);
+
+      // Clear old SVG
+      var existing = svgWrapper.querySelector('svg');
+      if (existing) svgWrapper.removeChild(existing);
+
+      if (res.solutions.length === 0) {
+        if (emptyViz) {
+          emptyViz.textContent = 'No buildings can be completed in ' + n + ' time units.';
+          emptyViz.style.display = '';
+        }
+        legend.style.display = 'none';
+        vizSub.textContent = 'Nothing to visualize.';
+        return;
+      }
+
+      if (emptyViz) emptyViz.style.display = 'none';
+      var first = res.solutions[0];
+      vizSub.textContent = 'Showing mix #1 of ' + res.solutions.length + ' — T:' + first.T + ' P:' + first.P + ' C:' + first.C + ' in priority build order.';
+      svgWrapper.appendChild(renderTimeline(first, n));
+      legend.style.display = '';
+    }
+
+    // -------------------------------------------------------------------------
+    // Event wiring
+    // -------------------------------------------------------------------------
+    document.getElementById('calcBtn').addEventListener('click', run);
+
+    document.getElementById('timeInput').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') run();
+    });
+
+    // Auto-run on page load with the default example (n = 13)
+    run();
   </script>
 </body>
 </html>

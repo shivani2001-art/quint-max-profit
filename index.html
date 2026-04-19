@@ -118,6 +118,95 @@
     button:active {
       transform: scale(0.97);
     }
+
+    .earnings {
+      margin-top: 20px;
+      padding: 16px 20px;
+      background: #eaf4fb;
+      border-left: 4px solid #3498db;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .earnings.visible {
+      display: block;
+    }
+
+    .earnings-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #5d6d7e;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .earnings-amount {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #1a6496;
+    }
+
+    .solutions {
+      margin-top: 18px;
+    }
+
+    .solutions h2 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #5d6d7e;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+
+    .solutions ol {
+      list-style: none;
+      counter-reset: sol;
+      display: grid;
+      gap: 8px;
+    }
+
+    .solutions li {
+      counter-increment: sol;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: #f9fbfc;
+      border: 1px solid #e6ecef;
+      border-radius: 6px;
+      font-family: 'SF Mono', Monaco, Consolas, 'Courier New', monospace;
+      font-size: 0.95rem;
+      color: #2c3e50;
+    }
+
+    .solutions li::before {
+      content: counter(sol) ".";
+      color: #95a5a6;
+      font-weight: 600;
+      min-width: 20px;
+    }
+
+    .sol-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .sol-tag.T { background: #fdebd0; color: #a0471c; }
+    .sol-tag.P { background: #d4efdf; color: #1e7e4a; }
+    .sol-tag.C { background: #e8daef; color: #6c3483; }
+
+    .no-result {
+      font-size: 0.9rem;
+      color: #7f8c8d;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
@@ -145,6 +234,16 @@
           <span class="error-msg" id="errorMsg"></span>
         </div>
         <button id="calcBtn">Calculate</button>
+      </div>
+
+      <div class="earnings" id="earnings">
+        <div class="earnings-label">Max earnings</div>
+        <div class="earnings-amount" id="earningsAmount">$0</div>
+
+        <div class="solutions" id="solutionsWrap">
+          <h2>Optimal mixes</h2>
+          <ol id="solutionsList"></ol>
+        </div>
       </div>
     </div>
   </div>
@@ -254,6 +353,54 @@
       }
 
       return { earnings: best, solutions: solutions };
+    }
+
+    // -------------------------------------------------------------------------
+    // Rendering
+    // -------------------------------------------------------------------------
+    function formatMoney(n) {
+      return '$' + n.toLocaleString('en-US');
+    }
+
+    function renderResult(res) {
+      var earningsEl   = document.getElementById('earnings');
+      var earningsAmt  = document.getElementById('earningsAmount');
+      var listEl       = document.getElementById('solutionsList');
+      var wrapEl       = document.getElementById('solutionsWrap');
+
+      earningsAmt.textContent = formatMoney(res.earnings);
+      listEl.innerHTML = '';
+
+      if (res.solutions.length === 0) {
+        wrapEl.style.display = 'none';
+        earningsEl.classList.add('visible');
+        return;
+      }
+
+      wrapEl.style.display = '';
+      for (var i = 0; i < res.solutions.length; i++) {
+        var s = res.solutions[i];
+        var li = document.createElement('li');
+
+        var tagT = document.createElement('span');
+        tagT.className = 'sol-tag T';
+        tagT.textContent = 'T: ' + s.T;
+
+        var tagP = document.createElement('span');
+        tagP.className = 'sol-tag P';
+        tagP.textContent = 'P: ' + s.P;
+
+        var tagC = document.createElement('span');
+        tagC.className = 'sol-tag C';
+        tagC.textContent = 'C: ' + s.C;
+
+        li.appendChild(tagT);
+        li.appendChild(tagP);
+        li.appendChild(tagC);
+        listEl.appendChild(li);
+      }
+
+      earningsEl.classList.add('visible');
     }
   </script>
 </body>

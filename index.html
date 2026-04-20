@@ -405,18 +405,25 @@
       return total;
     }
 
+    function compareSolutions(a, b) {
+      return (b.T - a.T) || (b.P - a.P) || (b.C - a.C);
+    }
+
     // -------------------------------------------------------------------------
     // Search every valid (t, p, c) combination, collecting all ties at max
     //
     // Bounded enumeration: at most floor(n/4) + 1 pubs per axis, and similar
     // bounds on theatres and parks, so the search space stays tiny.
+    //
+    // Ties are sorted by T, then P, then C descending so the output matches
+    // the statement's presentation order for cases like n = 7 and n = 49.
     // -------------------------------------------------------------------------
     function solve(n) {
       var maxT = Math.floor(n / BUILDINGS.T.buildTime);
       var maxP = Math.floor(n / BUILDINGS.P.buildTime);
       var maxC = Math.floor(n / BUILDINGS.C.buildTime);
 
-      var best = 0;
+      var best = -1;
       var solutions = [];
 
       for (var t = 0; t <= maxT; t++) {
@@ -431,13 +438,18 @@
             if (profit > best) {
               best = profit;
               solutions = [{ T: t, P: p, C: c }];
-            } else if (profit === best && best > 0) {
+            } else if (profit === best) {
               solutions.push({ T: t, P: p, C: c });
             }
           }
         }
       }
 
+      if (best < 0) {
+        return { earnings: 0, solutions: [] };
+      }
+
+      solutions.sort(compareSolutions);
       return { earnings: best, solutions: solutions };
     }
 

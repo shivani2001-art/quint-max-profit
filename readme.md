@@ -78,7 +78,7 @@ At tens-to-low-hundreds time units, bounded enumeration is the clearest code tha
 
 ## Test Cases
 
-Reproduces the spec exactly:
+Validated against the assignment examples and reviewer clarification:
 
 | n | Max earnings | Optimal mixes |
 |---|-------------:|---------------|

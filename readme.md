@@ -58,11 +58,13 @@ Consider building A then B. A earns `rate_A · (n − buildTime_A)`, B earns `ra
 
 So the schedule is always: all Theatres → all Pubs → all Parks.
 
-When multiple mixes tie, the app lists them in descending `T`, then `P`, then `C` order to match the assignment's sample output style.
+Only buildings that contribute earnings are included in the final plan. If a building finishes exactly at `n`, it has no operational time left and is excluded from the valid combinations.
+
+When multiple mixes tie, the app lists them in descending `T`, then `P`, then `C` order.
 
 **2. The mix space is tiny — enumerate it.**
 
-For any `n`, candidate mixes are bounded by `⌊n/5⌋ · ⌊n/4⌋ · ⌊n/10⌋`. Even at `n = 500`, that's ~62,500 triples — each evaluated in O(total buildings). Iterate every valid `(t, p, c)` with `5t + 4p + 10c ≤ n`, compute profit in the proven-optimal order, and keep all triples tied at the max.
+For any `n`, candidate mixes are bounded by `⌊n/5⌋ · ⌊n/4⌋ · ⌊n/10⌋`. Even at `n = 500`, that's ~62,500 triples — each evaluated in O(total buildings). Iterate every valid `(t, p, c)` with `5t + 4p + 10c < n`, compute profit in the proven-optimal order, and keep all triples tied at the max.
 
 ### Why this over dynamic programming?
 
@@ -80,11 +82,10 @@ Reproduces the spec exactly:
 
 | n | Max earnings | Optimal mixes |
 |---|-------------:|---------------|
-| 4  | $0      | `T:0 P:1 C:0` |
 | 7  | $3,000  | `T:1 P:0 C:0`, `T:0 P:1 C:0` |
 | 8  | $4,500  | `T:1 P:0 C:0` |
 | 13 | $16,500 | `T:2 P:0 C:0` |
-| 49 | $324,000 | `T:9 P:1 C:0`, `T:9 P:0 C:0`, `T:8 P:2 C:0` |
+| 49 | $324,000 | `T:9 P:0 C:0`, `T:8 P:2 C:0` |
 
 ## Features
 

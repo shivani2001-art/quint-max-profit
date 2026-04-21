@@ -415,8 +415,12 @@
     // Bounded enumeration: at most floor(n/4) + 1 pubs per axis, and similar
     // bounds on theatres and parks, so the search space stays tiny.
     //
-    // Ties are sorted by T, then P, then C descending so the output matches
-    // the statement's presentation order for cases like n = 7 and n = 49.
+    // A mix is only valid if every selected building contributes earnings.
+    // That means the final selected building must finish before n, not exactly
+    // at n. For example, at n = 49, T:9 P:1 C:0 is excluded because the pub
+    // finishes at time 49 and earns $0.
+    //
+    // Ties are sorted by T, then P, then C descending so output is deterministic.
     // -------------------------------------------------------------------------
     function solve(n) {
       var maxT = Math.floor(n / BUILDINGS.T.buildTime);
@@ -430,7 +434,7 @@
         for (var p = 0; p <= maxP; p++) {
           for (var c = 0; c <= maxC; c++) {
             if (t === 0 && p === 0 && c === 0) continue;
-            if (5 * t + 4 * p + 10 * c > n) continue;
+            if (5 * t + 4 * p + 10 * c >= n) continue;
 
             var profit = earningsFor({ T: t, P: p, C: c }, n);
             if (profit < 0) continue;
@@ -707,7 +711,7 @@
 
       if (res.solutions.length === 0) {
         if (emptyViz) {
-          emptyViz.textContent = 'No buildings can be completed in ' + n + ' time units.';
+          emptyViz.textContent = 'No buildings can earn money in ' + n + ' time units.';
           emptyViz.style.display = '';
         }
         legend.style.display = 'none';

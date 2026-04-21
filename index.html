@@ -385,7 +385,8 @@
     // Earnings computation for a fixed (t, p, c) mix built in priority order
     //
     // Building i is operational from time (cumulative build times up to i) to n,
-    // so its earnings = rate_i * (n - end_time_i).
+    // so its earnings = rate_i * (n - end_time_i). A selected building must
+    // have at least one operational time unit; finishing exactly at n is invalid.
     // -------------------------------------------------------------------------
     function earningsFor(counts, n) {
       var current = 0;
@@ -398,7 +399,7 @@
 
         for (var i = 0; i < count; i++) {
           current += spec.buildTime;
-          if (current > n) return -1; // ran out of time mid-build
+          if (current >= n) return -1; // no operational time left
           total += spec.rate * (n - current);
         }
       }

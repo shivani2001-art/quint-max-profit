@@ -361,11 +361,8 @@
     // -------------------------------------------------------------------------
     // Input parsing & validation
     //
-    // n must be a non-negative integer. We cap it at a reasonable bound so the
-    // UI can't DOS itself on a pasted million-digit value.
+    // n must be a non-negative integer that JavaScript can represent exactly.
     // -------------------------------------------------------------------------
-    var MAX_N = 500;
-
     function parseInput(raw) {
       var trimmed = String(raw).trim();
       if (trimmed === '') {
@@ -374,88 +371,99 @@
       if (!/^\d+$/.test(trimmed)) {
         return { error: 'Only non-negative integers are allowed.' };
       }
-      var n = parseInt(trimmed, 10);
-      if (n > MAX_N) {
-        return { error: 'Too large. Maximum allowed is ' + MAX_N + '.' };
+      var n = Number(trimmed);
+      if (!Number.isSafeInteger(n)) {
+        return { error: 'Please enter a safe whole number.' };
       }
       return { n: n };
-    }
-
-    // -------------------------------------------------------------------------
-    // Earnings computation for a fixed (t, p, c) mix built in priority order
-    //
-    // Building i is operational from time (cumulative build times up to i) to n,
-    // so its earnings = rate_i * (n - end_time_i). A selected building must
-    // have at least one operational time unit; finishing exactly at n is invalid.
-    // -------------------------------------------------------------------------
-    function earningsFor(counts, n) {
-      var current = 0;
-      var total = 0;
-
-      for (var b = 0; b < BUILD_ORDER.length; b++) {
-        var key = BUILD_ORDER[b];
-        var spec = BUILDINGS[key];
-        var count = counts[key];
-
-        for (var i = 0; i < count; i++) {
-          current += spec.buildTime;
-          if (current >= n) return -1; // no operational time left
-          total += spec.rate * (n - current);
-        }
-      }
-      return total;
     }
 
     function compareSolutions(a, b) {
       return (b.T - a.T) || (b.P - a.P) || (b.C - a.C);
     }
 
-    // -------------------------------------------------------------------------
-    // Search every valid (t, p, c) combination, collecting all ties at max
-    //
-    // Bounded enumeration: at most floor(n/4) + 1 pubs per axis, and similar
-    // bounds on theatres and parks, so the search space stays tiny.
-    //
-    // A mix is only valid if every selected building contributes earnings.
-    // That means the final selected building must finish before n, not exactly
-    // at n. For example, at n = 49, T:9 P:1 C:0 is excluded because the pub
-    // finishes at time 49 and earns $0.
-    //
-    // Ties are sorted by T, then P, then C descending so output is deterministic.
-    // -------------------------------------------------------------------------
-    function solve(n) {
-      var maxT = Math.floor(n / BUILDINGS.T.buildTime);
-      var maxP = Math.floor(n / BUILDINGS.P.buildTime);
-      var maxC = Math.floor(n / BUILDINGS.C.buildTime);
+    function solutionKey(s) {
+      return s.T + ':' + s.P + ':' + s.C;
+    }
 
-      var best = -1;
-      var solutions = [];
+    function addBuildingToSolution(solution, key) {
+      return {
+        T: solution.T + (key === 'T' ? 1 : 0),
+        P: solution.P + (key === 'P' ? 1 : 0),
+        C: solution.C + (key === 'C' ? 1 : 0)
+      };
+    }
 
-      for (var t = 0; t <= maxT; t++) {
-        for (var p = 0; p <= maxP; p++) {
-          for (var c = 0; c <= maxC; c++) {
-            if (t === 0 && p === 0 && c === 0) continue;
-            if (5 * t + 4 * p + 10 * c >= n) continue;
+    function uniqueSolutions(solutions) {
+      var seen = Object.create(null);
+      var unique = [];
 
-            var profit = earningsFor({ T: t, P: p, C: c }, n);
-            if (profit < 0) continue;
-
-            if (profit > best) {
-              best = profit;
-              solutions = [{ T: t, P: p, C: c }];
-            } else if (profit === best) {
-              solutions.push({ T: t, P: p, C: c });
-            }
-          }
+      for (var i = 0; i < solutions.length; i++) {
+        var key = solutionKey(solutions[i]);
+        if (!seen[key]) {
+          seen[key] = true;
+          unique.push(solutions[i]);
         }
       }
 
-      if (best < 0) {
+      return unique;
+    }
+
+    // -------------------------------------------------------------------------
+    // Dynamic programming over elapsed time, collecting all ties at max
+    //
+    // dp[time] stores the best profit that can still be earned from `time` to n,
+    // plus every building-count mix that achieves that profit.
+    //
+    // A selected building must finish before n. If it finishes exactly at n, it
+    // contributes no earnings and is not useful for an optimal answer.
+    //
+    // Ties are de-duplicated because different build orders can produce the same
+    // final mix. Output is sorted by T, then P, then C descending.
+    // -------------------------------------------------------------------------
+    function solve(n) {
+      var dp = new Array(n + 1);
+      var empty = { T: 0, P: 0, C: 0 };
+
+      for (var time = n; time >= 0; time--) {
+        var best = 0;
+        var solutions = [empty];
+
+        for (var b = 0; b < BUILD_ORDER.length; b++) {
+          var key = BUILD_ORDER[b];
+          var spec = BUILDINGS[key];
+          var end = time + spec.buildTime;
+
+          if (end >= n) continue;
+
+          var next = dp[end] || { earnings: 0, solutions: [empty] };
+          var profit = spec.rate * (n - end) + next.earnings;
+
+          if (profit > best) {
+            best = profit;
+            solutions = [];
+          }
+
+          if (profit === best) {
+            for (var i = 0; i < next.solutions.length; i++) {
+              solutions.push(addBuildingToSolution(next.solutions[i], key));
+            }
+          }
+        }
+
+        dp[time] = {
+          earnings: best,
+          solutions: uniqueSolutions(solutions)
+        };
+      }
+
+      var result = dp[0];
+      if (result.earnings <= 0) {
         return { earnings: 0, solutions: [] };
       }
 
-      solutions.sort(compareSolutions);
-      return { earnings: best, solutions: solutions };
+      result.solutions.sort(compareSolutions);
+      return result;
     }
 
     // -------------------------------------------------------------------------

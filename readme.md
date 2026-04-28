@@ -44,37 +44,39 @@ The default example `n = 13` runs on load. Enter any non-negative integer, press
 
 ## Algorithm
 
-### Two insights
+The app uses dynamic programming over elapsed time.
 
-**1. Within a chosen mix, optimal build order sorts by `rate / buildTime` descending.**
+For each time `t`, `dp[t]` stores the best profit that can still be earned from `t` until `n`, plus every building-count mix that achieves that profit.
 
-Consider building A then B. A earns `rate_A · (n − buildTime_A)`, B earns `rate_B · (n − buildTime_A − buildTime_B)`. The adjacent swap argument shows A-then-B beats B-then-A iff `rate_A / buildTime_A > rate_B / buildTime_B`.
+At each state, try building one more:
 
-| Building | rate / buildTime |
-|----------|-----------------:|
-| Theatre  | **300** |
-| Pub      | 250 |
-| Commercial Park | 200 |
+```txt
+finish = currentTime + buildTime
+profit = buildingRate * (n - finish) + dp[finish]
+```
 
-So the schedule is always: all Theatres → all Pubs → all Parks.
+A building is only valid if `finish < n`, because a building that finishes exactly at `n` has no operational time left and earns nothing.
 
-Only buildings that contribute earnings are included in the final plan. If a building finishes exactly at `n`, it has no operational time left and is excluded from the valid combinations.
+Since there are only three establishment types, each DP state checks only three choices:
 
-When multiple mixes tie, the app lists them in descending `T`, then `P`, then `C` order.
+| Building | Build time | Rate / unit |
+|----------|-----------:|------------:|
+| Theatre  | 5  | $1,500 |
+| Pub      | 4  | $1,000 |
+| Commercial Park | 10 | $2,000 |
 
-**2. The mix space is tiny — enumerate it.**
+When multiple choices produce the same max profit, the app keeps all tied mixes, removes duplicates, and lists them in descending `T`, then `P`, then `C` order.
 
-For any `n`, candidate mixes are bounded by `⌊n/5⌋ · ⌊n/4⌋ · ⌊n/10⌋`. Even at `n = 500`, that's ~62,500 triples — each evaluated in O(total buildings). Iterate every valid `(t, p, c)` with `5t + 4p + 10c < n`, compute profit in the proven-optimal order, and keep all triples tied at the max.
-
-### Why this over dynamic programming?
+### Why DP now?
 
 | Approach | Time | Space | Trade-off |
 |----------|------|-------|-----------|
-| **Bounded enumeration + greedy order** | O(n³ / 200) | O(1) | Simple, fast at the target scale |
-| 1-D DP over time | O(n · k) | O(n) | Standard knapsack-style, careful around ordering |
-| Full DP over mix state | O(n³) | O(n³) | Same space traversed, strictly more bookkeeping |
+| Brute-force count enumeration | O(n³) | O(1) | Very simple for exactly 3 types |
+| **1-D DP over elapsed time** | **O(n · k)** | **O(n)** | Faster and scales cleanly |
 
-At tens-to-low-hundreds time units, bounded enumeration is the clearest code that is still fast enough. Fancier doesn't help.
+`k = 3` here, so the DP is effectively linear in `n`.
+
+The earlier brute-force version was chosen because the PDF gives only three fixed building types, making all count combinations easy to try, correct to reason about, and simple to verify. DP is the cleaner optimized version because the decision is based on elapsed time: from each time state, choose the next building that gives the best future profit.
 
 ## Test Cases
 

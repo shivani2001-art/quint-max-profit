@@ -229,10 +229,12 @@
       display: flex;
       justify-content: flex-start;
       overflow-x: auto;
+      padding-bottom: 8px;
     }
 
     svg {
       display: block;
+      flex: 0 0 auto;
     }
 
     .legend {
@@ -521,8 +523,8 @@
     //   - solid colored block for the build phase
     //   - striped block for operational time (build end → n)
     // -------------------------------------------------------------------------
-    var MAX_TIMELINE_W    = 900;  // keep medium-large timelines readable in-card
-    var MIN_UNIT_PX       = 8;
+    var MAX_TIMELINE_W    = 900;  // fit smaller timelines without forcing scroll
+    var MIN_UNIT_PX       = 20;
     var MAX_UNIT_PX       = 32;
     var MAX_TIMELINE_ROWS = 12;
     var ROW_H             = 30;   // row height
